@@ -57,6 +57,7 @@ class ProcessDetectionData implements ShouldQueue
 //                    'triggered_at' => now(),
 //                ]);
             }
+            
             dd('Infracción no detectada');
 
             Log::info('Photo ticket processed successfully.');
