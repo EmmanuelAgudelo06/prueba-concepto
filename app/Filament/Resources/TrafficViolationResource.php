@@ -4,9 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TrafficViolationResource\Pages;
 use App\Models\TrafficViolation;
-use App\Services\ConditionEvaluator;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -22,34 +21,55 @@ class TrafficViolationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function createViolation(TrafficViolation $violation, array $detectionData): void
-    {
-        $evaluator = app(ConditionEvaluator::class);
-        $conditions = $violation->conditions; // Obtener condiciones almacenadas en la base de datos
-
-        foreach ($conditions as $condition) {
-            if ($evaluator->evaluate($condition, $detectionData)) {
-                // Registrar la infracción
-                $violation->triggered = true;
-                $violation->save();
-            }
-        }
-    }
+//    public static function createViolation(TrafficViolation $violation, array $detectionData): void
+//    {
+//        $evaluator = app(ConditionEvaluator::class);
+//        $conditions = $violation->conditions; // Obtener condiciones almacenadas en la base de datos
+//
+//        foreach ($conditions as $condition) {
+//            if ($evaluator->evaluate($condition, $detectionData)) {
+//                // Registrar la infracción
+//                $violation->triggered = true;
+//                $violation->save();
+//            }
+//        }
+//    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                TextInput::make('code'),
                 TextInput::make('name')
                     ->label('Name')
                     ->required(),
-                Textarea::make('condition')
-                            ->label('Expresión de Condición')
-                            ->helperText('Usa el lenguaje de expresiones de Symfony. Ejemplo: speed > 80 and time >= "06:00" and time <= "22:00"')
+                Repeater::make('condition')
+                    ->schema([
+                        Select::make('variable')
+                            ->options([
+                                'speed' => 'Velocidad',
+                                'plate' => 'Placa',
+                                'type' => 'Tipo',
+                                'date' => 'Fecha',
+                                'hour' => 'Hora',
+                            ])
                             ->required(),
-                TextInput::make('helper_text')
-                    ->label('Helper Text')
-                    ->nullable(),
+                        Select::make('operator')
+                            ->options([
+                                '==' => 'Igual a',
+                                '!=' => 'Diferente de',
+                                '<' => 'Menor que',
+                                '<=' => 'Menor o igual que',
+                                '>' => 'Mayor que',
+                                '>=' => 'Mayor o igual que',
+                            ])
+                            ->required(),
+                        TextInput::make('value')
+                            ->required(),
+                    ])
+                    ->columnSpanFull()
+                    ->columns(3),
+                TextInput::make('description'),
             ]);
     }
 
@@ -57,8 +77,16 @@ class TrafficViolationResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('code'),
                 TextColumn::make('name'),
-                TextColumn::make('helper_text'),
+                TextColumn::make('conditions')
+                    ->getStateUsing(function ($record) {
+                        return collect($record->condition)
+                            ->map(fn($condition) => "{$condition['variable']} {$condition['operator']} {$condition['value']}")
+                            ->join(' AND ');
+                    }),
+                TextColumn::make('description')
+                    ->wrap(),
             ])
             ->filters([
                 //

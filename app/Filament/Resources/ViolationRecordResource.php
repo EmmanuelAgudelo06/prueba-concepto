@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ViolationRecordResource\Pages;
-use App\Filament\Resources\ViolationRecordResource\RelationManagers;
 use App\Models\ViolationRecord;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ViolationRecordResource extends Resource
 {

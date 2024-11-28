@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('traffic_violations', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
             $table->string('name');
-            $table->text('condition');
-            $table->text('helper_text');
+            $table->json('condition')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\ProcessDetectionData;
+use App\Services\ConditionEvaluator;
 use Illuminate\Http\Request;
 
 class DetectionDataController extends Controller
